@@ -1,6 +1,6 @@
-from dataclasses import field
+from dataclasses import field, fields
 from rest_framework import serializers
-from EmployeeApp.models import Departments, Employees, dt, RawData
+from EmployeeApp.models import Departments, Employees, RawData
 
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,13 +11,20 @@ class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employees
         fields = ('EmployeeId','EmployeeName','Department','DateOfJoining','PhotoFileName')
-
-class dtSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = dt
-        fields = ('tm','hm','pp','wd','ws','sm','st','sc','lt','lw','bl','pv')
     
 class RawDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = RawData
         fields = ('dd','vn','ep','dt')
+        
+#From here on I am editing:-
+
+class dtSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RawData
+        fields = ['dt']
+
+class versionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=RawData
+        fields=['vn','ep']

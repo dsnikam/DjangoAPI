@@ -14,27 +14,13 @@ class Employees(models.Model):
     DateOfJoining = models.DateField()
     PhotoFileName = models.CharField(max_length=500)
 
-class dt(models.Model):
-    tm = models.IntegerField()
-    hm = models.IntegerField()
-    pp = models.IntegerField()
-    wd = models.IntegerField()
-    ws = models.IntegerField()
-    sm = models.IntegerField()
-    sm = models.IntegerField()
-    st = models.IntegerField()
-    sc = models.IntegerField()
-    lt = models.IntegerField()
-    lw = models.IntegerField()
-    bl = models.IntegerField()
-    pv = models.IntegerField()
+# Fromm here on I am editing
 
 class RawData(models.Model):
     #_id = models.AutoField(primary_key=True)
     dd = models.CharField(max_length=150)
     vn = models.CharField(max_length=150)
     ep = models.CharField(max_length=150)
-    #dt = dt()
     dt = JSONField(default=dict)
     
 
