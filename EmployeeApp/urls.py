@@ -27,11 +27,11 @@ urlpatterns=[
 
     #path('',views.index,name='index')
     url(r'^getdata$',views.getApi),
-    #url('get-version',views.getversionApi), # a.) part
+    url('get-version',views.getversionApi), # a.) part
     url('get-dd',views.getdeviceidApi), # b.) part
     #path('get-version-on-date',views.getdatewiseversionApi), # c.) part
     #url('rawdata',views.RawDataViewset.as_view())
-    #path('blah/<yyyy:date>',views.datewsieversionapi),
+    url(r'^blah/(?P<date>\d{2}-\d{2}-\d{4})',views.datewsieversionapi),
     url(r'^get-version-on-date/(?P<date>\d{2}-\d{2}-\d{4})',views.inefficientdatewsieversionapi), #c.) part inefficient
     url(r'^get-days-1-less-<int:n>-data',views.getnumberofdaysapi), #d.) part
     url(r'^get-highest values /(?P<date>\d{2}-\d{2}-\d{4})',views.datewisehighesttempapi) # e.) part

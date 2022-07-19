@@ -89,25 +89,36 @@ def getApi(request):
 
 @csrf_exempt
 def getversionApi(request):
-    rawdata = RawData.objects.all().values()
-    output = []
-    for x in rawdata:
-        output.append(str(x["vn"]))
-    output=list(set(output))
-    '''
-    out = ""
-    for x in output:
-        out += '"'
-        #output += str(x["ep"])
-        out += str(x)
-        out += '"'
-    return HttpResponse(out)
-    '''
-    data = {
-    'status': 'versions extracted successfully',
-    'payload': output
-    }
-    return JsonResponse(data)
+
+    try:
+        date = request.GET
+        print(date)
+        date = date["date"]
+        print(date)
+        dateepoch=calendar.timegm(time.strptime(date, '%d-%m-%Y'))
+        print(dateepoch)
+        return HttpResponse(dateepoch)
+    
+    except:
+        rawdata = RawData.objects.all().values()
+        output = []
+        for x in rawdata:
+            output.append(str(x["vn"]))
+        output=list(set(output))
+        '''
+        out = ""
+        for x in output:
+            out += '"'
+            #output += str(x["ep"])
+            out += str(x)
+            out += '"'
+        return HttpResponse(out)
+        '''
+        data = {
+        'status': 'versions extracted successfully',
+        'payload': output
+        }
+        return JsonResponse(data)
 
 @csrf_exempt
 def getdeviceidApi(request):
@@ -144,16 +155,19 @@ def getdatewiseversionApi(request,*args,**kwargs):
     '''
     return JsonResponse(rawdataserializer.data,safe=False)
 
+@csrf_exempt
 def datewsieversionapi(request,date):
     dateepoch=calendar.timegm(time.strptime(date, '%d-%m-%Y'))
+    print(dateepoch)
     #rawdata = RawData.objects.get(dateepoch<ep<dateepoch+86400)
-    
-    rawdata = RawData.objects.filter(ep>dateepoch,ep<dateepoch+86400)
+    rawdata = RawData.objects.filter(ep__gte = dateepoch)
+    print(len(rawdata))
+    #rawdata = rawdata.filter(ep__lt = dateepoch+86400)
     output=[]
     for x in rawdata:
         output.append(x["vn"])
     data={
-    'status': 'versions extracted successfully for required date',
+    'status': 'versions extracted successfully for required date this this',
  	'payload': output
     }
     return JsonResponse(data)
@@ -162,7 +176,6 @@ def inefficientdatewsieversionapi(request,date):
     dateepoch=calendar.timegm(time.strptime(date, '%d-%m-%Y'))
     #rawdata = RawData.objects.get(dateepoch<ep<dateepoch+86400)
     rawdata = RawData.objects.all().values()
-    #rawdata = RawData.objects.filter(ep>dateepoch,ep<dateepoch+86400)
     output=[]
     for x in rawdata:
         if x["ep"]>=dateepoch and x["ep"]<dateepoch+86400:
