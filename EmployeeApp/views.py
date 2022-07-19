@@ -1,6 +1,5 @@
 import calendar
 from operator import index, truediv
-import re
 import time
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -41,33 +40,6 @@ def departmentApi(request,id=0):
         department=Departments.objects.get(DepartmentId=id)
         department.delete()
         return JsonResponse("Deleted Successfully",save=False)
-'''
-@csrf_exempt
-def rawdataApi(request):
-    if request.method == 'GET':
-        rawdata = RawData.objects.all()
-        rawdata_serializer = RawDataSerializer(rawdata, many=True)
-        return JsonResponse(rawdata_serializer.data,safe=False)
-    elif request.method=='POST':
-        rawdata_data = JSONParser().parse(request)
-        rawdata_serializer=RawDataSerializer(data=rawdata_data)
-        if rawdata_serializer.is_valid():
-            rawdata_serializer.save()
-            return JsonResponse("Added Succesfully",safe=False)
-        return JsonResponse("Failed to Add",safe=False)
-    elif request.method=='PUT':
-        rawdata_data = JSONParser().parse(request)
-        rawdata = RawData.objects.get(_id=rawdata_data['_id'])
-        rawdata_serializer=RawDataSerializer(rawdata,data=rawdata_data)
-        if rawdata_serializer.is_valid():
-            rawdata_serializer.save()
-            return JsonResponse("Updated Successfully",safe=False)
-        return JsonResponse("Failed to Update")
-    elif request.method=='DELETE':
-        rawdata=RawData.objects.get(_id=id)
-        rawdata.delete()
-        return JsonResponse("Deleted Successfully",save=False)
-'''
     
 # From here on I am editing
 
@@ -81,39 +53,36 @@ def index(request):
     output += '"'
   return HttpResponse(output)
 
+'''
 @csrf_exempt
 def getApi(request):
     rawdata = RawData.objects.all()
     rawdata_serializer = dtSerializer(rawdata, many=True)
     return JsonResponse(rawdata_serializer.data,safe=False)
+'''    
 
 @csrf_exempt
 def getversionApi(request):
-
     try:
-        date = request.GET
-        print(date)
-        date = date["date"]
-        print(date)
+        params=request.GET
+        date=params["date"]
         dateepoch=calendar.timegm(time.strptime(date, '%d-%m-%Y'))
-        print(dateepoch)
-        return HttpResponse(dateepoch)
-    
+        rawdata = RawData.objects.filter(ep__gte=dateepoch)
+        rawdata = rawdata.filter(ep__lt = dateepoch+86400).values()
+        output=[]
+        for x in rawdata:
+            output.append(x["vn"])
+        data={
+        'status': 'versions extracted successfully for required date',
+ 	    'payload': output
+        }
+        return JsonResponse(data)
     except:
         rawdata = RawData.objects.all().values()
         output = []
         for x in rawdata:
             output.append(str(x["vn"]))
         output=list(set(output))
-        '''
-        out = ""
-        for x in output:
-            out += '"'
-            #output += str(x["ep"])
-            out += str(x)
-            out += '"'
-        return HttpResponse(out)
-        '''
         data = {
         'status': 'versions extracted successfully',
         'payload': output
@@ -133,36 +102,14 @@ def getdeviceidApi(request):
     }
     return JsonResponse(data)
 
+'''
 @csrf_exempt
-def getdatewiseversionApi(request,*args,**kwargs):
-    rawdata = RawData.objects.all().values()
-    rawdataserializer = versionSerializer(rawdata,many=True)
-    params = kwargs
-    print(params)
-    '''
-    #date = params["date"]
+def getdatewiseversionApi(request):
+    date=request.GET
+    date=date["date"]
     dateepoch=calendar.timegm(time.strptime(date, '%d-%m-%Y'))
-    #rawdata = RawData.objects.get(dateepoch<ep<dateepoch+86400)
-    rawdata = RawData.objects.get(ep=dateepoch)
-    output=[]
-    for x in rawdata:
-        output.append(x["vn"])
-    data={
-    'status': 'versions extracted successfully for required date',
- 	'payload': output
-    }
-    return JsonResponse(data)
-    '''
-    return JsonResponse(rawdataserializer.data,safe=False)
-
-@csrf_exempt
-def datewsieversionapi(request,date):
-    dateepoch=calendar.timegm(time.strptime(date, '%d-%m-%Y'))
-    print(dateepoch)
-    #rawdata = RawData.objects.get(dateepoch<ep<dateepoch+86400)
-    rawdata = RawData.objects.filter(ep__gte = dateepoch)
-    print(len(rawdata))
-    #rawdata = rawdata.filter(ep__lt = dateepoch+86400)
+    rawdata = RawData.objects.filter(ep__gte=dateepoch)
+    rawdata = rawdata.filter(ep__lt = dateepoch+86400).values()
     output=[]
     for x in rawdata:
         output.append(x["vn"])
@@ -171,7 +118,9 @@ def datewsieversionapi(request,date):
  	'payload': output
     }
     return JsonResponse(data)
+'''
 
+'''
 def inefficientdatewsieversionapi(request,date):
     dateepoch=calendar.timegm(time.strptime(date, '%d-%m-%Y'))
     #rawdata = RawData.objects.get(dateepoch<ep<dateepoch+86400)
@@ -185,27 +134,63 @@ def inefficientdatewsieversionapi(request,date):
  	'payload': output
     }
     return JsonResponse(data)
+'''
 
 def getnumberofdaysapi(request,n):
-    n=n
+    n=int(n)
     daystart=1617235200
-    #the count should be done using filter itself
+    temp=1
+    numofdays=0
+    while temp != 0:
+        rawdata = RawData.objects.filter(ep__gte = daystart)
+        rawdata = rawdata.filter(ep__lt = daystart+86400).values()
+        temp = rawdata.count()
+        if temp == n-1:
+            numofdays+=1
+        daystart+=86400
+    data = {
+        'status': 'required number of days extracted',
+        'payload': numofdays
+    }
+    return JsonResponse(data)
 
-def datewisehighesttempapi(request,date):
+def datewisehighesttempapi(request):
+    params = request.GET
+    date = params["date"]
     dateepoch=calendar.timegm(time.strptime(date, '%d-%m-%Y'))
-    rawdata = RawData.objects.all().values()
-    #rawdata = RawData.objects.filter(ep>dateepoch,ep<dateepoch+86400)
+    #rawdata = RawData.objects.all().values()
+    rawdata = RawData.objects.filter(ep__gte = dateepoch)
+    rawdata = rawdata.filter(ep__lt = dateepoch+86400).values()
     t=0
     h=0
     for x in rawdata:
-        if x["ep"]>=dateepoch and x["ep"]<dateepoch+86400:
-            if x["dt"]["tm"]>t:
-                t=x["dt"]["tm"]
-            if x["dt"]["hm"]>h:
-                h=x["dt"]["hm"]
+        if x["dt"]["tm"]>t:
+            t=x["dt"]["tm"]
+        if x["dt"]["hm"]>h:
+            h=x["dt"]["hm"]
     output={'tm':t,'hm':h}    
     data={
     'status': 'versions extracted successfully for required date',
  	'payload': output
+    }
+    return JsonResponse(data)
+
+def getnoofdataptsapi(request):
+    params = request.GET
+    print(params)
+    start_date = params["start_date"]
+    end_date = params["end_date"]
+    vn = params["vn"]
+    vn = vn[1:-1]  # there is a issue of quotation marks solved here
+    start_epoch = calendar.timegm(time.strptime(start_date, '%d-%m-%Y'))
+    end_epoch = calendar.timegm(time.strptime(end_date, '%d-%m-%Y'))+86400
+    rawdata = RawData.objects.filter(ep__gte = start_epoch)
+    rawdata = rawdata.filter(ep__lt = end_epoch)
+    rawdata = rawdata.filter(vn = vn)
+    noofdatapts = rawdata.count()
+    payload = {'datapoints':noofdatapts}
+    data = {
+        'status': 'number of data points for given version extracted',
+ 	    'payload': payload
     }
     return JsonResponse(data)
