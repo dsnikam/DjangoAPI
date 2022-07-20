@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'EmployeeApp.apps.EmployeeappConfig',
+    'ApiApp.apps.ApiappConfig',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -82,7 +82,7 @@ WSGI_APPLICATION = 'DjangoAPI.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
-        'NAME': 'mytestdb',
+        'NAME': 'minetestdb',
     }
 }
 

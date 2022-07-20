@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from django.urls import path
-from EmployeeApp import views
+from ApiApp import views
 
 from datetime import datetime
 

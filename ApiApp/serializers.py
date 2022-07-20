@@ -1,6 +1,6 @@
 from dataclasses import field, fields
 from rest_framework import serializers
-from EmployeeApp.models import Departments, Employees, RawData
+from ApiApp.models import Departments, Employees, RawData
 
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -47,4 +47,4 @@ class demoversionSerializer(serializers.ModelSerializer):
         print(4)
         return newdata
         
-        
+

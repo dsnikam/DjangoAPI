@@ -14,11 +14,11 @@ from django.http.response import JsonResponse
 from rest_framework import viewsets,status
 from rest_framework.views import APIView
 from django.template import loader
-from EmployeeApp import serializers
+from ApiApp import serializers
 
 
-from EmployeeApp.models import Departments,Employees,RawData
-from EmployeeApp.serializers import DepartmentSerializer,EmployeeSerializer,RawDataSerializer, dtSerializer,demoversionSerializer
+from ApiApp.models import Departments,Employees,RawData
+from ApiApp.serializers import DepartmentSerializer,EmployeeSerializer,RawDataSerializer, dtSerializer,demoversionSerializer
 
 # Create your views here.
 
