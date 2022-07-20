@@ -24,7 +24,27 @@ class dtSerializer(serializers.ModelSerializer):
         model = RawData
         fields = ['dt']
 
-class versionSerializer(serializers.ModelSerializer):
+class demoversionSerializer(serializers.ModelSerializer):
+    
+    _id = serializers.CharField(max_length=150)
+    dd = serializers.CharField(max_length=150)
+    vn = serializers.CharField(max_length=150)
+    #ep = models.CharField(max_length=150)
+    ep = serializers.IntegerField()
+    dt = serializers.JSONField(default=dict)
     class Meta:
-        model=RawData
-        fields=['vn','ep']
+        model = RawData
+        fields = ['_id','dd','vn','ep','dt']
+
+    def create(self, validated_data):
+        return RawData.objects.create(**validated_data)
+
+    def update(self, rawdata , validated_data):
+        newdata = RawData(**validated_data)
+        newdata.dd = rawdata.dd
+        print(3)
+        newdata.save()
+        print(4)
+        return newdata
+        
+        
