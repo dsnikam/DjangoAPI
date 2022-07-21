@@ -1,23 +1,13 @@
 from dataclasses import field, fields
 from rest_framework import serializers
-from ApiApp.models import Departments, Employees, RawData
+from ApiApp.models import RawData   #DepartmentSerializer,EmployeeSerializer,
+    
+#From here on I am editing:-
 
-class DepartmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Departments
-        fields = ('DepartmentId','DepartmentName')
-    
-class EmployeeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Employees
-        fields = ('EmployeeId','EmployeeName','Department','DateOfJoining','PhotoFileName')
-    
 class RawDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = RawData
         fields = ('dd','vn','ep','dt')
-        
-#From here on I am editing:-
 
 class dtSerializer(serializers.ModelSerializer):
     class Meta:
@@ -48,3 +38,15 @@ class demoversionSerializer(serializers.ModelSerializer):
         return newdata
         
 
+
+'''
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Departments
+        fields = ('DepartmentId','DepartmentName')
+    
+class EmployeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employees
+        fields = ('EmployeeId','EmployeeName','Department','DateOfJoining','PhotoFileName')
+'''
