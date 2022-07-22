@@ -83,6 +83,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'NAME': 'minetestdb',
+        #'NAME': 'minetestdb1',
     }
 }
 

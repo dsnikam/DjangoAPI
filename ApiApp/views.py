@@ -1,38 +1,13 @@
 import calendar
-from functools import partial
-from operator import index, truediv
 import time
-from bson import ObjectId
-from django.db import IntegrityError
 from django.http import HttpResponse
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.views.defaults import bad_request
-from requests import Response
 from rest_framework.parsers import JSONParser
 from django.http.response import JsonResponse
-from rest_framework import viewsets,status
-from rest_framework.views import APIView
-from django.template import loader
-from ApiApp import serializers
 
-
-from ApiApp.models import RawData     #,Departments,Employees
-from ApiApp.serializers import RawDataSerializer, dtSerializer,demoversionSerializer #DepartmentSerializer,EmployeeSerializer,
+from ApiApp.models import RawData
 
 # Create your views here.
-    
-# From here on I am editing
-
-def index(request):
-  mymembers = RawData.objects.all().values()
-  output = ""
-  for x in mymembers:
-    output += '"'
-    #output += str(x["ep"])
-    output += str(x["dt"]["tm"])
-    output += '"'
-  return HttpResponse(output)
 
 @csrf_exempt
 def getversionApi(request):
@@ -75,6 +50,7 @@ def getdeviceidApi(request):
     }
     return JsonResponse(data)
 
+@csrf_exempt
 def getnumberofdaysapi(request,n):
     n=int(n)
     daystart=1617235200-86400
@@ -97,6 +73,7 @@ def getnumberofdaysapi(request,n):
     }
     return JsonResponse(data)
 
+@csrf_exempt
 def datewisehighesttempapi(request):
     params = request.GET
     date = params["date"]
@@ -113,11 +90,12 @@ def datewisehighesttempapi(request):
             h=x["dt"]["hm"]
     output={'tm':t,'hm':h}    
     data={
-    'status': 'versions extracted successfully for required date',
+    'status': 'highest tm and hm values for given date extracted',
  	'payload': output
     }
     return JsonResponse(data)
 
+@csrf_exempt
 def getnoofdataptsapi(request):
     params = request.GET
     print(params)
@@ -139,62 +117,33 @@ def getnoofdataptsapi(request):
     return JsonResponse(data)
 
 @csrf_exempt
-def demochangeversionapi(request):
-    #try:
-    if request.method == 'POST':
-        request_data = JSONParser().parse(request)
-        rawdata = RawData.objects.filter(ep = request_data['dataepoch'])
-        rawdata = rawdata.filter(dd = request_data['dd'])
-        for x in rawdata:
-            print(1)
-            x.vn = request_data['new_vn']
-            print(2)
-            x.save()
-            print(3)
-        return HttpResponse("Voila")
-    #except:
-    #    return HttpResponse("something went wrong")
-    
-
-    '''
-    try:
-        request_data = JSONParser().parse(request)
-        rawdata = RawData.objects.filter(ep = request_data['dataepoch'])
-        rawdata = rawdata.filter(dd = request_data['dd'])
-    except:
-        return HttpResponse(status=404)
-
+def changeversionapi(request):
     try:
         if request.method == 'POST':
-            #request_data = JSONParser().parse(request)
-            #rawdata = RawData.objects.filter(ep = request_data['dataepoch'])
-            #rawdata = rawdata.filter(dd = request_data['dd'])
-            rdata = rawdata.values()
-            print(1)
-            print(rdata[0]["_id"])
-            print(2)
-            req_data = {
-                "_id": str(rdata[0]["_id"]),
-                "dd" : rdata[0]["dd"],
-                "vn" : request_data['new_vn'],
-                "ep" : rdata[0]["ep"],
-                "dt" : rdata[0]["dt"]
-            }
+            request_data = JSONParser().parse(request)
+            rawdata = RawData.objects.filter(ep = request_data['dataepoch'])
+            rawdata = rawdata.filter(dd = request_data['dd'])
             for x in rawdata:
-                rawdata_serializer = demoversionSerializer(x, data = req_data)
-                print(2.5)
-                if rawdata_serializer.is_valid():
-                    print(2.6)
-                    rawdata_serializer.save()
-                    print(2.7)
-                    #return JsonResponse({"message":"Update can be performed"}, safe=False)
-                    return JsonResponse(rawdata_serializer.data, safe=False)
-                else:
-                    return JsonResponse(rawdata_serializer.errors, safe=False)
+                x.vn = request_data['new_vn']
+                x.save()
+            data={'status': 'Datapoint successfully updated with new version'}
+            return JsonResponse(data,safe=False)
     except:
-        print("exception caused")
-        return HttpResponse("something's wrong")
-    '''
+        return HttpResponse("something went wrong")
+
+@csrf_exempt
+def exchangetmhmapi(request):
+    if request.method == 'POST':
+        request_data = JSONParser().parse(request)
+        rawdata = RawData.objects.filter(ep = request_data['dataepoch'], dd = request_data['dd'])
+        for x in rawdata:
+            temp1 = x.dt["hm"]
+            temp2 = x.dt["tm"]
+            x.dt["hm"] = temp2
+            x.dt["tm"] = temp1
+            x.save()
+        data={'status': 'tm and hm in data point are successfully exchanged'}
+        return JsonResponse(data,safe=False)
     
 @csrf_exempt
 def deleteapi(request):
@@ -203,32 +152,5 @@ def deleteapi(request):
         rawdata = RawData.objects.filter(ep = request_data['dataepoch'])
         rawdata = rawdata.filter(dd = request_data['dd'])
         rawdata.delete()
-        return JsonResponse({'status':'Datapoint deleted succesfully'},safe=False)
-
-'''
-@csrf_exempt
-def departmentApi(request,id=0):
-    if request.method == 'GET':
-        departments = Departments.objects.all()
-        rawdata_serializer = DepartmentSerializer(departments, many=True)
-        return JsonResponse(rawdata_serializer.data,safe=False)
-    elif request.method=='POST':
-        department_data = JSONParser().parse(request)
-        rawdata_serializer=DepartmentSerializer(data=department_data)
-        if rawdata_serializer.is_valid():
-            rawdata_serializer.save()
-            return JsonResponse("Added Succesfully",safe=False)
-        return JsonResponse("Failed to Add",safe=False)
-    elif request.method=='PUT':
-        department_data = JSONParser().parse(request)
-        department = Departments.objects.get(DepartmentId=department_data['DepartmentId'])
-        rawdata_serializer=DepartmentSerializer(department,data=department_data)
-        if rawdata_serializer.is_valid():
-            rawdata_serializer.save()
-            return JsonResponse("Updated Successfully",safe=False)
-        return JsonResponse("Failed to Update")
-    elif request.method=='DELETE':
-        department=Departments.objects.get(DepartmentId=id)
-        department.delete()
-        return JsonResponse("Deleted Successfully",save=False)
-'''
+        data={'status':'Datapoint deleted succesfully'}
+        return JsonResponse(data,safe=False)
